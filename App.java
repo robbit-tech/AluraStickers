@@ -1,17 +1,15 @@
 
-import java.awt.Image;
+
 import java.io.InputStream;
-import java.net.URI;
+
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
+
+
 
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.text.Keymap;
+
 
 
 
@@ -25,35 +23,43 @@ public class App {
 
         // Fazer uma conexão HTTP e buscar os filmes 
         String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java-2-api/main/TopMovies.json";
-        URI address  = URI.create(url);
-        // A criação da variavel serve para inferir o tipo, remover a repetição de declaração.
-        var client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder(address).GET().build();
-         HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-        String body = response.body();
-       
+        ExtratorDeConteudo extrator = new ExtratorDeConteudoDoImdb();
         
-       
+
+       //  String url ="https://raw.githubusercontent.com/alura-cursos/imersao-java-2-api/main/NASA-APOD.json";
+       // var extrator = new ExtratatorDeConteudoDaNasa();
+
+         var http = new ClienteHttp();
+         String json = http.buscaDados(url);
+
+          
+        
+        
 
         // Selecionar os dados com alguns atributos especificos (titulo, poster e classificação)
-        var parser = new JsonParse();
-        List<Map<String, String>> listadefilmes = parser.parse(body) ;
         
-        // Exibir e manipular os dados do jeito que eu quiser.
-        for (Map<String,String> filme : listadefilmes) {
+        List<Conteudo> conteudos = extrator.extraiConteudos(json); 
+        
+        
+        
 
-            String urlImagem = filme.get("image");
-            String titulo = filme.get("title");
+        var geradora = new GeradoraDeFigurinhas();
+
+        // Exibir e manipular os dados do jeito que eu quiser.
+       for (int i = 0; i <10; i++){
+         Conteudo conteudo = conteudos.get(i) ;
+            
+
+            
+            
             //float rate = String.format( "%.2f", (filme.get("ImdbRating")));
-            InputStream inputStream = new URL(urlImagem).openStream();
+            InputStream inputStream = new URL(conteudo.getUrlImagem()).openStream();
             
+            String nomeArquivo =  conteudo.getTitulo() + ".png";
             
-            
-            String nomeArquivo = titulo + ".png";
-            var geradora = new GeradoraDeFigurinhas();
             geradora.cria(inputStream, nomeArquivo);
             
-            System.out.println(filme.get( "title"));
+            System.out.println(conteudo.getTitulo());
         //    System.out.println(filme.get( "image"));
         //    System.out.println(filme.get( "imDbRating"));
             
